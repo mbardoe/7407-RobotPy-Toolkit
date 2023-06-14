@@ -1,12 +1,12 @@
 import math
 
+from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Rotation2d, Pose2d, Translation2d
 from wpimath.kinematics import SwerveDrive4Odometry, SwerveDrive4Kinematics, SwerveModuleState, ChassisSpeeds, \
     SwerveModulePosition
-from wpimath.estimator import SwerveDrive4PoseEstimator
 
 from robotpy_toolkit_7407.oi.joysticks import JoystickAxis
-from robotpy_toolkit_7407.sensors.gyro import BaseGyro
+from robotpy_toolkit_7407.sensors.gyro.swerve_gyro import SwerveGyro
 from robotpy_toolkit_7407.subsystem import Subsystem
 from robotpy_toolkit_7407.utils import logger
 from robotpy_toolkit_7407.utils.math import rotate_vector, bounded_angle_diff
@@ -14,12 +14,55 @@ from robotpy_toolkit_7407.utils.units import s, m, deg, rad, hour, mile, rev, me
     radians_per_second, radians
 
 
+class SwerveNodeOffset:
+    motor_sensor_offset: radians = 0
+    motor_reversed_start: bool = False
+
+    def init(self, offset: radians, motor_reversed: bool = False) -> None:
+        '''
+
+        Args:
+            When we start a SwerveNodeOffset we need to know what direction the offset is and the
+            the direction of the motor when moving in that direction.
+
+            offset: A radian measure indicating where the motor things zero is.
+            motor_reversed: Whether the motor is reversed or not when driving in the direction of the offset
+
+        Returns: None
+
+        '''
+
+        new_offset = math.fmod(offset, math.pi)
+        if new_offset > math.pi / 2:
+            new_offset -= math.pi
+        number_pis = round((offset - new_offset) / math.pi)
+        if number_pis % 2 == 1:
+            self.motor_reversed_start = not motor_reversed
+        else:
+            self.motor_reversed_start = motor_reversed
+
+    def change_direction(self) -> None:
+        if self.motor_sensor_offset < math.pi / 2:
+            self.motor_sensor_offset += math.pi
+        else:
+            self.motor_sensor_offset -= math.pi
+        self.motor_reversed_start = not self.motor_reversed_start
+
+    def get_offset(self) -> radians:
+        return self.motor_sensor_offset
+
+    def get_motor_direction(self) -> bool:
+        return self.motor_reversed_start
+
+    def set_offset(self, offset: radians, direction: bool) -> None:
+
+
 class SwerveNode:
     """
     Extendable class for swerve node.
     """
     motor_reversed: bool = False
-    motor_sensor_offset: radians = 0
+    motor_sensor_offset: SwerveNodeOffset
 
     def init(self):
         """
@@ -121,24 +164,13 @@ class SwerveNode:
         diff = bounded_angle_diff(initial_angle, target_angle)
 
         # Should we flip
-        if abs(diff) > 0.65 * math.pi:
-            flip_sensor_offset = math.pi if diff > 0 else -math.pi
+        if abs(diff) > 0.65 * math.pi:  #
+            flip_sensor_offset = math.pi if diff > 0 else -math.pi  # I think that this part doesn't make much sense.
             diff -= flip_sensor_offset
             return diff + initial_angle, True, flip_sensor_offset
 
         return diff + initial_angle, False, 0
 
-
-class SwerveGyro(BaseGyro):
-    """
-    LEGACY VERSION OF THIS CLASS. HERE FOR BACKWARDS COMPATIBILITY WITH
-    OLD CODE. PLEASE ONLY UPDATE robotpy_toolkit_7407.sensors.gyro.swerve_gyro
-
-    Extendable class for swerve gyro.
-    """
-
-    def __init__(self):
-        super().__init__()
 
 class SwerveDrivetrain(Subsystem):
     """

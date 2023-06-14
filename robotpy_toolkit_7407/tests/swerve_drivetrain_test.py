@@ -2,7 +2,9 @@ import pytest
 from pytest import MonkeyPatch
 
 from robotpy_toolkit_7407.subsystem_templates.drivetrain.swerve_drivetrain import *
-#from robotpy_toolkit_7407.utils.units import s, m, deg, rad, hour, mile, rev, meters, meters_per_second, \
+
+
+# from robotpy_toolkit_7407.utils.units import s, m, deg, rad, hour, mile, rev, meters, meters_per_second, \
 #    radians_per_second, radians
 
 # def test_swerveNode_set()->None:
@@ -16,72 +18,88 @@ from robotpy_toolkit_7407.subsystem_templates.drivetrain.swerve_drivetrain impor
 #     # Assert
 #     assert True
 @pytest.mark.parametrize("initial_angle, target_angle, answer", [
-    (math.pi/4 , math.pi/3, (math.pi/3, False, 0)),
-    (3, 6, (3-math.pi+3, True, math.pi)),
-     (3, -3, (3.2831853071, False, 0))
+    (math.pi / 4, math.pi / 3, (math.pi / 3, False, 0)),
+    (3, 6, (3 - math.pi + 3, True, math.pi)),
+    (3, -3, (3.2831853071, False, 0)),
+    (2, -1, (2.141592653589793, True, -math.pi)),
+    (-math.pi / 2, math.pi / 2, (-1.5707963267948966, True, math.pi))
+
 ])
-def test_resolve_angles(target_angle, initial_angle, answer)->None:
+def test_resolve_angles(target_angle, initial_angle, answer) -> None:
     # Setup
-    node=SwerveNode()
+    node = SwerveNode()
 
     # Action
 
     result = SwerveNode._resolve_angles(target_angle=target_angle, initial_angle=initial_angle)
 
     # Assert
-    assert result[2]==answer[2]
-    assert result[1]==answer[1]
-    assert result[0]==pytest.approx(answer[0], abs=.00001)
+    assert result[2] == answer[2]
+    assert result[1] == answer[1]
+    assert result[0] == pytest.approx(answer[0], abs=.00001)
 
 
-
-def test_get_node_state(monkeypatch: MonkeyPatch)->None:
+def test_get_node_state(monkeypatch: MonkeyPatch) -> None:
     # Setup
-    node=SwerveNode()
+    node = SwerveNode()
 
     def mock_get_motor_velocity(self):
         return 8
+
     def mock_get_turn_motor_angle(self):
-        return math.pi/4
+        return math.pi / 4
+
     monkeypatch.setattr(SwerveNode, "get_motor_velocity", mock_get_motor_velocity)
     monkeypatch.setattr(SwerveNode, "get_turn_motor_angle", mock_get_turn_motor_angle)
 
     # Action
-    state=node.get_node_state()
+    state = node.get_node_state()
     # Assert
-    assert type(state)==SwerveModuleState
-    assert state.speed==8
-    assert state.angle.radians()==pytest.approx(math.pi/4, abs=.0001)
+    assert type(state) == SwerveModuleState
+    assert state.speed == 8
+    assert state.angle.radians() == pytest.approx(math.pi / 4, abs=.0001)
 
-def test_get_node_positions(monkeypatch: MonkeyPatch)->None:
+
+def test_get_node_positions(monkeypatch: MonkeyPatch) -> None:
     # Setup
-    node=SwerveNode()
+    node = SwerveNode()
 
     def mock_get_drive_motor_traveled_distance(self):
         return 8
+
     def mock_get_turn_motor_angle(self):
-        return math.pi/4
+        return math.pi / 4
+
     monkeypatch.setattr(SwerveNode, "get_drive_motor_traveled_distance", mock_get_drive_motor_traveled_distance)
     monkeypatch.setattr(SwerveNode, "get_turn_motor_angle", mock_get_turn_motor_angle)
 
     # Action
-    position=node.get_node_position()
+    position = node.get_node_position()
     # Assert
-    assert type(position)==SwerveModulePosition
-    assert position.distance==8
-    assert position.angle.radians()==pytest.approx(math.pi/4, abs=.0001)
+    assert type(position) == SwerveModulePosition
+    assert position.distance == 8
+    assert position.angle.radians() == pytest.approx(math.pi / 4, abs=.0001)
+
 
 # TODO Parameterize and make more cases
-def test_set_angle(monkeypatch: MonkeyPatch)->None:
-    #setup
-    node=SwerveNode()
-    node.motor_sensor_offset=1
+@pytest.mark.parametrize("target_angle, initial_angle, answer", [
+    (-3, 3, 2.2831853071),
+    (3, 6, 5.141592653589793),
+    (3, -3, -4.283185307179586),
+    (2, -1, -2.141592653589793),
+    (-math.pi / 2, math.pi / 2, 0.5707963267948966)
+])
+def test_set_angle(target_angle, initial_angle, answer, monkeypatch: MonkeyPatch) -> None:
+    # setup
+    node = SwerveNode()
+    node.motor_sensor_offset = 1
+
     def mock_set_motor_angle(self, pos):
-        node.target=pos
+        node.target = pos
 
     monkeypatch.setattr(SwerveNode, "set_motor_angle", mock_set_motor_angle)
-    #action
-    node._set_angle(-3, 3) # returns (3.2831853071, False, 0)
+    # action
+    node._set_angle(target_angle, initial_angle)  # returns (3.2831853071, False, 0)
 
-    #assert
-    assert node.target==pytest.approx(2.2831853071)
+    # assert
+    assert node.target == pytest.approx(answer)
