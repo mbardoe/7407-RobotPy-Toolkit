@@ -1,9 +1,5 @@
 import math
 
-from robotpy_toolkit_7407.unum import Unum
-
-from robotpy_toolkit_7407.utils.units import rad
-
 
 def bounded_angle_diff(theta_from: float, theta_too: float) -> float:
     """
@@ -18,10 +14,36 @@ def bounded_angle_diff(theta_from: float, theta_too: float) -> float:
 
 
 def rotate_vector(x: float, y: float, theta: float) -> tuple[float, float]:
+    '''
+    Rotates a vector counter-clockwise by the given angle.
+    Args:
+        x: x-coordinate of the vector
+        y: y-coordinate of the vector
+        theta: angle in radians
+
+    Returns: rotated 2 dimensional vector as tuple
+
+    '''
     return (
         x * math.cos(theta) - y * math.sin(theta),
         x * math.sin(theta) + y * math.cos(theta)
     )
+
+
+def unit_normal(x: float, y: float) -> tuple[float, float]:
+    '''
+    Create a unit vector that is 90 degrees rotated counter-clockwise from (x, y)
+    Args:
+        x: x coordinate of vector that is to be rotated
+        y: y coordinate of the vector that is to be rotated
+
+    Returns: a tuple that represents the unit normal vector to (x,y).
+
+    '''
+    if x == 0 and y == 0:
+        raise ValueError("Can't have both x and y equal to zero.")
+    mag = math.sqrt(x ** 2 + y ** 2)
+    return -y / mag, x / mag
 
 
 def clamp(val: float, _min: float, _max: float):

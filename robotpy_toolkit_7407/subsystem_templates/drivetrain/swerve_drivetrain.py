@@ -1,5 +1,5 @@
 import math
-
+from dataclasses import dataclass
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Rotation2d, Pose2d, Translation2d
 from wpimath.kinematics import SwerveDrive4Odometry, SwerveDrive4Kinematics, SwerveModuleState, ChassisSpeeds, \
@@ -9,9 +9,11 @@ from robotpy_toolkit_7407.oi.joysticks import JoystickAxis
 from robotpy_toolkit_7407.sensors.gyro.swerve_gyro import SwerveGyro
 from robotpy_toolkit_7407.subsystem import Subsystem
 from robotpy_toolkit_7407.utils import logger
-from robotpy_toolkit_7407.utils.math import rotate_vector, bounded_angle_diff
+from robotpy_toolkit_7407.utils.math import rotate_vector, bounded_angle_diff, unit_normal
 from robotpy_toolkit_7407.utils.units import s, m, deg, rad, hour, mile, rev, meters, meters_per_second, \
     radians_per_second, radians
+from robotpy_toolkit_7407.motor import PIDMotor
+from robotpy_toolkit_7407.encoder import AbsoluteEncoder
 
 
 class SwerveNodeOffset:
@@ -31,6 +33,51 @@ class SwerveNodeOffset:
         Returns: None
 
         '''
+        self.set_offset(offset, motor_reversed)
+
+    def change_direction(self) -> None:
+        '''
+        Change the direction of the offset, and flip the direction.
+
+        Returns: None
+
+        '''
+        if self.motor_sensor_offset < math.pi / 2:
+            self.motor_sensor_offset += math.pi
+        else:
+            self.motor_sensor_offset -= math.pi
+        self.motor_reversed_start = not self.motor_reversed_start
+
+    def get_offset(self) -> radians:
+        '''
+        Get the current offset.
+
+        Returns: the current offset in radians
+
+        '''
+        return self.motor_sensor_offset
+
+    def get_motor_direction(self) -> bool:
+        '''
+        Get the direction of the desired direction of the powering motor.
+        Returns: a boolean that represents
+
+        '''
+        return self.motor_reversed_start
+
+    def set_offset(self, offset: radians, motor_reversed: bool) -> None:
+        '''
+        Given an offset and the direction of the motor set the current offset to
+        that measurement. The motor reversed is updated if the current offset would
+        be different given that it is between -pi/2 and pi/2.
+
+        Args:
+            offset:
+            motor_reversed:
+
+        Returns:
+
+        '''
 
         new_offset = math.fmod(offset, math.pi)
         if new_offset > math.pi / 2:
@@ -41,135 +88,6 @@ class SwerveNodeOffset:
         else:
             self.motor_reversed_start = motor_reversed
 
-    def change_direction(self) -> None:
-        if self.motor_sensor_offset < math.pi / 2:
-            self.motor_sensor_offset += math.pi
-        else:
-            self.motor_sensor_offset -= math.pi
-        self.motor_reversed_start = not self.motor_reversed_start
-
-    def get_offset(self) -> radians:
-        return self.motor_sensor_offset
-
-    def get_motor_direction(self) -> bool:
-        return self.motor_reversed_start
-
-    def set_offset(self, offset: radians, direction: bool) -> None:
-
-
-class SwerveNode:
-    """
-    Extendable class for swerve node.
-    """
-    motor_reversed: bool = False
-    motor_sensor_offset: SwerveNodeOffset
-
-    def init(self):
-        """
-        Initialize the swerve node.
-        """
-        ...
-
-    def set(self, vel: meters_per_second, angle_radians: radians_per_second):
-        """
-        Set the velocity and angle of the swerve node.
-
-        Args:
-            vel (meters_per_second): velocity of the swerve node
-            angle_radians (radians_per_second): turning swerve node velocity in radians per second
-        """
-        self._set_angle(angle_radians, self.get_turn_motor_angle() + self.motor_sensor_offset)
-        self.set_motor_velocity(vel if not self.motor_reversed else -vel)
-
-    # OVERRIDDEN FUNCTIONS
-    def set_motor_angle(self, pos: radians):
-        """
-        Set the angle of the swerve node. Must be overridden.
-
-        Args:
-            pos (radians): angle of the swerve node in radians
-        """
-        ...
-
-    def get_turn_motor_angle(self) -> radians:
-        """
-        Get the current angle of the swerve node. Must be overridden. Must return radians.
-        """
-        ...
-
-    def set_motor_velocity(self, vel: meters_per_second):
-        """
-        Set the velocity of the swerve node. Must be overridden.
-        Args:
-            vel (meters_per_second): velocity of the swerve node in meters per second
-        """
-        ...
-
-    def get_motor_velocity(self) -> meters_per_second:
-        """
-        Get the velocity of the swerve node. Must be overridden. Must return meters per second.
-        """
-        ...
-
-    def get_drive_motor_traveled_distance(self) -> meters:
-        """
-        Get the distance traveled by the drive motor. Must be overridden. Must return meters.
-        """
-        ...
-
-    def get_node_position(self) -> SwerveModulePosition:
-        """
-        Get the position of the swerve node.
-
-        Returns:
-            SwerveModulePosition: position of the swerve node
-        """
-        return SwerveModulePosition(
-            self.get_drive_motor_traveled_distance(),
-            Rotation2d(self.get_turn_motor_angle())
-        )
-
-    def get_node_state(self) -> SwerveModuleState:
-        """
-        Get the state of the swerve node.
-        Returns:
-            SwerveModuleState: state of the swerve node
-        """
-        return SwerveModuleState(
-            self.get_motor_velocity(),
-            Rotation2d(self.get_turn_motor_angle())
-        )
-
-    # 0 degrees is facing right | "ethan is our FRC lord and saviour" - sid
-    def _set_angle(self, target_angle: radians, initial_angle: radians):
-        target_sensor_angle, flipped, flip_sensor_offset = SwerveNode._resolve_angles(target_angle, initial_angle)
-
-        target_sensor_angle -= self.motor_sensor_offset
-
-        if flipped:
-            self.motor_reversed = not self.motor_reversed
-            self.motor_sensor_offset += flip_sensor_offset
-
-        self.set_motor_angle(target_sensor_angle)
-
-    @staticmethod
-    def _resolve_angles(target_angle: radians, initial_angle: radians) -> tuple[float, bool, float]:
-        """
-        :param target_angle: Target node angle
-        :param initial_angle: Initial node sensor angle
-        :return: (target_sensor_angle, flipped, flip_sensor_offset)
-        """
-        # TODO This function only has one client function. Rewrite or integrate into _calculate_swerve_node
-        # Actual angle difference in radians
-        diff = bounded_angle_diff(initial_angle, target_angle)
-
-        # Should we flip
-        if abs(diff) > 0.65 * math.pi:  #
-            flip_sensor_offset = math.pi if diff > 0 else -math.pi  # I think that this part doesn't make much sense.
-            diff -= flip_sensor_offset
-            return diff + initial_angle, True, flip_sensor_offset
-
-        return diff + initial_angle, False, 0
 
 
 class SwerveDrivetrain(Subsystem):
@@ -364,7 +282,7 @@ class SwerveDrivetrain(Subsystem):
     def _calculate_swerve_node(node_x: meters, node_y: meters, dx: meters_per_second, dy: meters_per_second,
                                d_theta: radians_per_second) -> (meters_per_second, radians):
         '''
-        This is a helper method to determine the direction and speed to set the nodes
+        DEPRECATED. This is a helper method to determine the direction and speed to set the nodes
         ONLY WORKS WITH A SQUARE ROBOT!!!
         This should really be a node method.
         Args:

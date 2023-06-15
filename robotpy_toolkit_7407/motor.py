@@ -1,6 +1,9 @@
 from typing import Protocol
+from dataclasses import dataclass
 
 from robotpy_toolkit_7407.utils.units import radians, radians_per_second
+from robotpy_toolkit_7407.encoder import Encoder, AbsoluteEncoder
+
 
 
 class Motor(Protocol):
@@ -25,7 +28,9 @@ class Motor(Protocol):
         ...
 
 
+@dataclass
 class EncoderMotor(Protocol):
+    encoder: Encoder
 
     def init(self) -> None:
         '''
@@ -76,6 +81,7 @@ class EncoderMotor(Protocol):
 
 
 class PIDMotor(Protocol):
+    encoder: AbsoluteEncoder
 
     def init(self) -> None:
         '''
