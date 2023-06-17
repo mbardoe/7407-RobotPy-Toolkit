@@ -3,7 +3,6 @@ from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveDrive4Odometry, SwerveDrive4Kinematics, SwerveModuleState, ChassisSpeeds, \
     SwerveModulePosition
 
-from robotpy_toolkit_7407.oi.joysticks import JoystickAxis
 from robotpy_toolkit_7407.sensors.gyro.swerve_gyro import SwerveGyro
 from robotpy_toolkit_7407.subsystem import Subsystem
 from robotpy_toolkit_7407.subsystem_templates.drivetrain import SwerveNode
@@ -22,9 +21,6 @@ class SwerveDrivetrain(Subsystem):
     n_back_left: SwerveNode
     n_back_right: SwerveNode
     gyro: SwerveGyro
-    axis_dx: JoystickAxis
-    axis_dy: JoystickAxis
-    axis_rotation: JoystickAxis
     track_width: meters = 1
     max_vel: meters_per_second = (20 * mile / hour).asNumber(m / s)  # Maximum velocity
     max_angular_vel: radians_per_second = (4 * rev / s).asNumber(rad / s)  # Maximum angular velocity

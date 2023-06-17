@@ -1,7 +1,8 @@
+import math
 import pytest
 from pytest import MonkeyPatch
-
-from robotpy_toolkit_7407.subsystem_templates.drivetrain.swerve_drivetrain import *
+from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
+from robotpy_toolkit_7407.subsystem_templates.drivetrain.swerve_drivetrain import SwerveNode
 
 
 # from robotpy_toolkit_7407.utils.units import s, m, deg, rad, hour, mile, rev, meters, meters_per_second, \

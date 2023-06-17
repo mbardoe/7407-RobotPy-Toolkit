@@ -1,4 +1,3 @@
-import math
 import time
 
 from wpimath.controller import HolonomicDriveController, PIDController, ProfiledPIDControllerRadians
@@ -7,9 +6,7 @@ from wpimath.trajectory import TrapezoidProfileRadians, Trajectory
 
 from robotpy_toolkit_7407.command import SubsystemCommand
 from robotpy_toolkit_7407.subsystem_templates.drivetrain.swerve_drivetrain import SwerveDrivetrain
-from robotpy_toolkit_7407.utils import logger
 from robotpy_toolkit_7407.utils.math import rotate_vector, bounded_angle_diff
-from robotpy_toolkit_7407.utils.units import m, s, rad
 
 
 class DriveSwerve(SubsystemCommand[SwerveDrivetrain]):
@@ -26,8 +23,8 @@ class DriveSwerve(SubsystemCommand[SwerveDrivetrain]):
         """
         dx, dy, d_theta = self.subsystem.axis_dx.value, self.subsystem.axis_dy.value, self.subsystem.axis_rotation.value
 
-        dx *= self.subsystem.max_vel.asUnit(m / s)
-        dy *= -self.subsystem.max_vel.asUnit(m / s)
+        dx *= self.subsystem.max_vel
+        dy *= -self.subsystem.max_vel
 
         self.subsystem.set_driver_centric((dx, dy), -d_theta * self.subsystem.max_angular_vel)
 
