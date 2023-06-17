@@ -14,8 +14,14 @@ class DoubleSolenoidPiston:
             reverse_channel (int): The channel on the PCM that the reverse channel of the solenoid is connected to
             ctre_hub (bool): Whether the PCM is connected to a CTRE Pneumatics Control Module or not.
         """
-        module_type = wpilib.PneumaticsModuleType.CTREPCM if ctre_hub else wpilib.PneumaticsModuleType.REVPH
-        self.solenoid = wpilib.DoubleSolenoid(module, module_type, forward_channel, reverse_channel)
+        module_type = (
+            wpilib.PneumaticsModuleType.CTREPCM
+            if ctre_hub
+            else wpilib.PneumaticsModuleType.REVPH
+        )
+        self.solenoid = wpilib.DoubleSolenoid(
+            module, module_type, forward_channel, reverse_channel
+        )
 
     def extend(self):
         """

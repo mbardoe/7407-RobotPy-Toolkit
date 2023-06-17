@@ -36,4 +36,3 @@ class BaseGyro:
         Reset the robot heading. Overridden class.
         """
         ...
-

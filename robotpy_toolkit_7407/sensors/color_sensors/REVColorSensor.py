@@ -8,13 +8,15 @@ class REVColorSensor:
     REVColor Sensor Wrapper for usage with I2C Multiplexer
     """
 
-    def __init__(self,
-                 sensor_port: int,
-                 I2C_address: int = 0x71,
-                 threshold_blue: float = 500,
-                 threshold_red: float = 500,
-                 threshold_green: float = 400,
-                 debug: bool = False):
+    def __init__(
+        self,
+        sensor_port: int,
+        I2C_address: int = 0x71,
+        threshold_blue: float = 500,
+        threshold_red: float = 500,
+        threshold_green: float = 400,
+        debug: bool = False,
+    ):
         """
         REVColor Sensor Wrapper for usage with I2C Multiplexer
 
@@ -62,7 +64,9 @@ class REVColorSensor:
 
         if vals[0] == 0:
             if self.debug:
-                self.logger.log_warning("Values not found, reinitializing color sensor...")
+                self.logger.log_warning(
+                    "Values not found, reinitializing color sensor..."
+                )
 
             self.multiplexer = I2C(I2C.Port.kMXP, self.I2C_address)
             self.sensor = ColorSensorV3(I2C.Port.kMXP)

@@ -10,6 +10,7 @@ class GyroADIS16448(BaseGyro):
     """
     Wrapper class for the ADIS16448 Gyro
     """
+
     def __init__(self) -> None:
         self._gyro = ADIS16448_IMU()
         self.__offset = 0

@@ -12,7 +12,11 @@ class Compressor:
             module (int): The Pneumatics Control Module (PCM) CAN ID
             ctre_hub (bool): Whether the PCM is connected to a CTRE Pneumatics Control Module or not
         """
-        module_type = wpilib.PneumaticsModuleType.CTREPCM if ctre_hub else wpilib.PneumaticsModuleType.REVPH
+        module_type = (
+            wpilib.PneumaticsModuleType.CTREPCM
+            if ctre_hub
+            else wpilib.PneumaticsModuleType.REVPH
+        )
         self.compressor = wpilib.Compressor(module, module_type)
 
     def get_compressor_enabled(self) -> bool:

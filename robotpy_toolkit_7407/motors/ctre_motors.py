@@ -7,7 +7,14 @@ import ctre
 from robotpy_toolkit_7407.unum import Unum
 
 from robotpy_toolkit_7407.motor import PIDMotor
-from robotpy_toolkit_7407.utils.units import rad, rev, s, radians_per_second, radians_per_second_squared, radians
+from robotpy_toolkit_7407.utils.units import (
+    rad,
+    rev,
+    s,
+    radians_per_second,
+    radians_per_second_squared,
+    radians,
+)
 
 
 @dataclass
@@ -23,6 +30,7 @@ class TalonConfig:
         closed_loop_peak_output: The maximum output of the controller
         neutral_brake: Whether to brake or coast when the motor is not moving
     """
+
     k_P: Optional[float] = None
     k_I: Optional[float] = None
     k_D: Optional[float] = None
@@ -45,7 +53,9 @@ k_radians_to_sensor_pos = rad.asNumber(talon_sensor_unit)
 k_sensor_vel_to_rad_per_sec = talon_sensor_vel_unit.asNumber(rad / s)
 k_rad_per_sec_to_sensor_vel = (rad / s).asNumber(talon_sensor_unit / hundred_ms)
 k_sensor_accel_to_rad_per_sec_sq = talon_sensor_accel_unit.asNumber(rad / (s * s))
-k_rad_per_sec_sq_to_sensor_accel = (rad / (s * s)).asNumber(talon_sensor_unit / (s * hundred_ms))
+k_rad_per_sec_sq_to_sensor_accel = (rad / (s * s)).asNumber(
+    talon_sensor_unit / (s * hundred_ms)
+)
 
 
 class _Talon(PIDMotor):
@@ -92,11 +102,19 @@ class _Talon(PIDMotor):
         if config.closed_loop_peak_output is not None:
             self._motor.configClosedLoopPeakOutput(0, config.closed_loop_peak_output)
         if config.motion_cruise_velocity is not None:
-            self._motor.configMotionCruiseVelocity(config.motion_cruise_velocity * k_rad_per_sec_to_sensor_vel)
+            self._motor.configMotionCruiseVelocity(
+                config.motion_cruise_velocity * k_rad_per_sec_to_sensor_vel
+            )
         if config.motion_acceleration is not None:
-            self._motor.configMotionAcceleration(config.motion_acceleration * k_rad_per_sec_sq_to_sensor_accel)
+            self._motor.configMotionAcceleration(
+                config.motion_acceleration * k_rad_per_sec_sq_to_sensor_accel
+            )
         if config.neutral_brake is not None:
-            self._motor.setNeutralMode(ctre.NeutralMode.Brake if config.neutral_brake else ctre.NeutralMode.Coast)
+            self._motor.setNeutralMode(
+                ctre.NeutralMode.Brake
+                if config.neutral_brake
+                else ctre.NeutralMode.Coast
+            )
         if config.integral_zone is not None:
             self._motor.config_IntegralZone(0, config.integral_zone)
         if config.max_integral_accumulator is not None:
@@ -149,9 +167,12 @@ class TalonGroup(PIDMotor):
     """
     Group of Talon motor controllers. Used when multiple motors act as a single unit with a leader motor
     """
+
     motors: list[_Talon]
 
-    def __init__(self, *motors: _Talon, config: TalonConfig = None, leader_idx: int = 0):
+    def __init__(
+        self, *motors: _Talon, config: TalonConfig = None, leader_idx: int = 0
+    ):
         super().__init__()
         self.motors = list(motors)
         for m in self.motors:

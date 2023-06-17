@@ -2,11 +2,24 @@ from builtins import type
 from dataclasses import dataclass
 from typing import Optional
 
-from rev import CANSparkMax, SparkMaxPIDController, SparkMaxRelativeEncoder, SparkMaxAlternateEncoder
+from rev import (
+    CANSparkMax,
+    SparkMaxPIDController,
+    SparkMaxRelativeEncoder,
+    SparkMaxAlternateEncoder,
+)
 
 from robotpy_toolkit_7407.motor import PIDMotor
-from robotpy_toolkit_7407.utils.units import rev, minute, radians, radians_per_second, rad, s, rotations_per_second, \
-    rotations
+from robotpy_toolkit_7407.utils.units import (
+    rev,
+    minute,
+    radians,
+    radians_per_second,
+    rad,
+    s,
+    rotations_per_second,
+    rotations,
+)
 
 from robotpy_toolkit_7407.unum import Unum
 
@@ -49,11 +62,18 @@ class SparkMax(PIDMotor):
     """
     Wrapper class for the SparkMax motor controller
     """
+
     motor: CANSparkMax
     encoder: SparkMaxRelativeEncoder
     pid_controller: SparkMaxPIDController
 
-    def __init__(self, can_id: int, inverted: bool = True, brushless: bool = True, config: SparkMaxConfig = None):
+    def __init__(
+        self,
+        can_id: int,
+        inverted: bool = True,
+        brushless: bool = True,
+        config: SparkMaxConfig = None,
+    ):
         """
 
         Args:
@@ -74,7 +94,9 @@ class SparkMax(PIDMotor):
         """
         self.motor = CANSparkMax(
             self._can_id,
-            CANSparkMax.MotorType.kBrushless if self._brushless else CANSparkMax.MotorType.kBrushed
+            CANSparkMax.MotorType.kBrushless
+            if self._brushless
+            else CANSparkMax.MotorType.kBrushed,
         )
         self.motor.setInverted(self._inverted)
         self.pid_controller = self.motor.getPIDController()
@@ -147,6 +169,8 @@ class SparkMax(PIDMotor):
         if config.k_F is not None:
             self.pid_controller.setFF(config.k_F)
         if config.output_range is not None:
-            self.pid_controller.setOutputRange(config.output_range[0], config.output_range[1])
+            self.pid_controller.setOutputRange(
+                config.output_range[0], config.output_range[1]
+            )
         if config.idle_mode is not None:
             self.motor.setIdleMode(config.idle_mode)

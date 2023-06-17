@@ -5,6 +5,7 @@ of Unum, so if you have custom units they should be in their own file.
 """
 
 from robotpy_toolkit_7407.unum import Unum
+
 unit = Unum.unit
 
 # << uncomment this import if you want to derive your units from SI >>
@@ -13,8 +14,6 @@ unit = Unum.unit
 # << define your units hereafter, e.g.
 #    M  = unit(  'm' , 0          , 'meter'     )
 #    KM = unit( 'km' , 1000. * M  , 'kilometer' ) >>
-
-
 
 
 # cleaning

@@ -4,6 +4,7 @@ Source : http://physics.nist.gov/cuu/Units/units.html)
 """
 
 from robotpy_toolkit_7407.unum import Unum
+
 unit = Unum.unit
 
 m = M = unit("m", 0, "meter")
@@ -42,7 +43,7 @@ hs = unit("hs", 10**2 * s, "hectosecond")
 das = unit("das", 10**1 * s, "decasecond")
 ys = unit("ys", 10**-24 * s, "yoctosecond")
 zs = unit("zs", 10**-21 * s, "zeptosecond")
-#as = unit("as", 10**-18 * s, "attosecond") # as is a reserved word
+# as = unit("as", 10**-18 * s, "attosecond") # as is a reserved word
 fs = unit("fs", 10**-15 * s, "femtosecond")
 ps = unit("ps", 10**-12 * s, "picosecond")
 ns = unit("ns", 10**-9 * s, "nanosecond")

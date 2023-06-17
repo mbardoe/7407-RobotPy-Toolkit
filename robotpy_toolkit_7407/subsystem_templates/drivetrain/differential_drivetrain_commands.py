@@ -3,8 +3,14 @@ from robotpy_toolkit_7407.unum import Unum
 
 from robotpy_toolkit_7407.command import SubsystemCommand, T
 from robotpy_toolkit_7407.motors.ctre_motors import talon_sensor_vel_unit
-from robotpy_toolkit_7407.subsystem_templates.drivetrain.differential_drivetrain import DifferentialDrivetrain
-from robotpy_toolkit_7407.utils.math import clamp, talon_sensor_units_to_inches, inches_to_talon_sensor_units
+from robotpy_toolkit_7407.subsystem_templates.drivetrain.differential_drivetrain import (
+    DifferentialDrivetrain,
+)
+from robotpy_toolkit_7407.utils.math import (
+    clamp,
+    talon_sensor_units_to_inches,
+    inches_to_talon_sensor_units,
+)
 from robotpy_toolkit_7407.utils.units import m, s
 
 
@@ -13,6 +19,7 @@ class DriveArcade(SubsystemCommand[DifferentialDrivetrain]):
     """
     Arcade drive command for differential drivetrain.
     """
+
     def __init__(self, subsystem: T, track_width_inches: float):
         """
 
@@ -33,7 +40,10 @@ class DriveArcade(SubsystemCommand[DifferentialDrivetrain]):
 
         left, right = self._turn_radius_drive(x_axis, y_axis, self.track_width_inches)
 
-        self.subsystem.set_motor_velocity(left * ctre_motors.k_sensor_vel_to_rad_per_sec, -right * ctre_motors.k_sensor_vel_to_rad_per_sec)
+        self.subsystem.set_motor_velocity(
+            left * ctre_motors.k_sensor_vel_to_rad_per_sec,
+            -right * ctre_motors.k_sensor_vel_to_rad_per_sec,
+        )
 
     def end(self, interrupted: bool) -> None:
         self.subsystem.set_motor_velocity(0, 0)
@@ -64,7 +74,9 @@ class DriveArcade(SubsystemCommand[DifferentialDrivetrain]):
         return left, right
 
     @staticmethod
-    def _turn_radius_drive(x_axis: float, y_axis: float, track_width_inches: float) -> tuple[float, float]:
+    def _turn_radius_drive(
+        x_axis: float, y_axis: float, track_width_inches: float
+    ) -> tuple[float, float]:
         if y_axis > 0:
             x_axis = -x_axis
 
@@ -88,7 +100,9 @@ class DriveArcade(SubsystemCommand[DifferentialDrivetrain]):
             velocity_difference = (track_width_inches * target_velocity) / turn_radius
 
         left = inches_to_talon_sensor_units(target_velocity - velocity_difference, True)
-        right = inches_to_talon_sensor_units(target_velocity + velocity_difference, True)
+        right = inches_to_talon_sensor_units(
+            target_velocity + velocity_difference, True
+        )
 
         left = clamp(left, -18000, 18000)
         right = clamp(right, -18000, 18000)

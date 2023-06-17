@@ -13,7 +13,11 @@ class SingleSolenoidPiston:
             channel (int): The channel on the PCM that the solenoid is connected to
             ctre_hub (bool): Whether the PCM is connected to a CTRE Pneumatics Control Module or not.
         """
-        module_type = wpilib.PneumaticsModuleType.CTREPCM if ctre_hub else wpilib.PneumaticsModuleType.REVPH
+        module_type = (
+            wpilib.PneumaticsModuleType.CTREPCM
+            if ctre_hub
+            else wpilib.PneumaticsModuleType.REVPH
+        )
         self.solenoid = wpilib.Solenoid(module, module_type, channel)
 
     def extend(self):

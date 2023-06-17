@@ -9,6 +9,7 @@ class Logger:
     """
     Custom logger utility for logging to console and a custom log file.
     """
+
     def __init__(
         self,
         debug: bool = False,
@@ -41,9 +42,7 @@ class Logger:
         if self.file_on:
             try:
                 self.logfile = open(self.filename, "a")
-                self.logfile.write(
-                    message
-                )
+                self.logfile.write(message)
                 self.logfile.close()
             except Exception:
                 ...

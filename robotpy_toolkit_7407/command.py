@@ -10,6 +10,7 @@ class BasicCommand(commands2.CommandBase):
     """
     Extendable basic command
     """
+
     ...
 
 

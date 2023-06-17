@@ -14,7 +14,13 @@ class Limelight:
     Connect, get, and modify limelight values and settings through the NetworkTables interface.
     """
 
-    def __init__(self, cam_height: float, cam_angle: float, target_height: float = None, robot_ip: str = "10.74.07.2"):
+    def __init__(
+        self,
+        cam_height: float,
+        cam_angle: float,
+        target_height: float = None,
+        robot_ip: str = "10.74.07.2",
+    ):
         """
         Args:
             cam_height (float): Height of the limelight camera from the ground in meters.
@@ -28,20 +34,20 @@ class Limelight:
         self.ty = 0
         self.refs = 0
         self.k_cam_height = (cam_height * m).asNumber(m)  # Height from ground
-        self.k_cam_angle: radians = (cam_angle * deg).asNumber(rad)  # Angle from horizontal
+        self.k_cam_angle: radians = (cam_angle * deg).asNumber(
+            rad
+        )  # Angle from horizontal
         if target_height is not None:
             self.k_h_target_height = (target_height * m).asNumber(m)
         else:
             self.k_h_target_height = self.k_cam_height
 
     def led_on(self):
-        """Turn limelight LEDs on. Recommended to use ref_on instead.
-        """
+        """Turn limelight LEDs on. Recommended to use ref_on instead."""
         self.table.putNumber("ledMode", 3)
 
     def led_off(self):
-        """Turn limelight LEDs off. Recommended to use ref_off instead.
-        """
+        """Turn limelight LEDs off. Recommended to use ref_off instead."""
         self.table.putNumber("ledMode", 1)
 
     def ref_on(self):
@@ -61,10 +67,9 @@ class Limelight:
             self.led_off()
 
     def update(self):
-        """Update Limelight Values to NetworkTables. Run this every loop to ensure fresh values.
-        """
-        c_tx = self.table.getNumber('tx', None)
-        c_ty = self.table.getNumber('ty', None)
+        """Update Limelight Values to NetworkTables. Run this every loop to ensure fresh values."""
+        c_tx = self.table.getNumber("tx", None)
+        c_ty = self.table.getNumber("ty", None)
         if c_tx is None or c_ty is None:
             return "No target found."
         self.tx = c_tx
@@ -120,10 +125,12 @@ class LimelightController(VisionEstimator):
                 (
                     Pose3d(
                         Translation3d(est_pose[0], est_pose[1], est_pose[2]),
-                        Rotation3d(est_pose[3], est_pose[4], est_pose[5])
+                        Rotation3d(est_pose[3], est_pose[4], est_pose[5]),
                     ),
-                    Timer.getFPGATimestamp()
-                ) if est_pose else (None, None)
+                    Timer.getFPGATimestamp(),
+                )
+                if est_pose
+                else (None, None)
             )
 
         return pose_list if pose_list else None
